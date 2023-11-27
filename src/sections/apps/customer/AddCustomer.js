@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import { useEffect, useState } from 'react';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import {
   Box,
   Button,
@@ -12,9 +11,9 @@ import {
   Divider,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   FormLabel,
   Grid,
-  FormHelperText,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -26,18 +25,18 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 // third-party
-import _ from 'lodash';
+import { Form, FormikProvider, useFormik } from 'formik';
 import * as Yup from 'yup';
-import { useFormik, Form, FormikProvider } from 'formik';
 
 // project imports
-import AlertCustomerDelete from './AlertCustomerDelete';
 import Avatar from 'components/@extended/Avatar';
 import IconButton from 'components/@extended/IconButton';
+import AlertCustomerDelete from './AlertCustomerDelete';
 
 import { ThemeMode } from 'config';
 import { dispatch } from 'store';
@@ -82,13 +81,11 @@ const AddCustomer = ({ customer, onCancel }) => {
   const isCreating = !customer;
 
   const [selectedImage, setSelectedImage] = useState(undefined);
-  const [avatar, setAvatar] = useState(avatarImage(`./avatar-${isCreating && !customer?.avatar ? 1 : customer.avatar}.png`));
+  const [avatar, setAvatar] = useState(avatarImage(`./avatar-${!customer?.avatar ? 1 : customer.avatar}.png`));
 
   useEffect(() => {
-    if (selectedImage) {
-      setAvatar(URL.createObjectURL(selectedImage));
-    }
-  }, [selectedImage]);
+    setAvatar(avatarImage(`./avatar-${!customer?.avatar ? 1 : customer.avatar}.png`));
+  }, [customer, selectedImage]);
 
   const CustomerSchema = Yup.object().shape({
     name: Yup.string().max(255).required('Name is required'),
@@ -99,6 +96,7 @@ const AddCustomer = ({ customer, onCancel }) => {
 
   const formik = useFormik({
     initialValues: getInitialValues(customer),
+    enableReinitialize: true,
     validationSchema: CustomerSchema,
     onSubmit: (values, { setSubmitting }) => {
       try {
