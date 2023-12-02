@@ -19,7 +19,7 @@ import imgfootersoc2 from 'assets/images/landing/img-soc2.svg';
 import imgfootersoc3 from 'assets/images/landing/img-soc3.svg';
 import AnimateButton from 'components/@extended/AnimateButton';
 
-const dashImage = require.context('assets/images/landings', true);
+const dashImage = require.context('assets/images/landing', true);
 
 // link - custom style
 const FooterLink = styled(Link)(({ theme }) => ({
