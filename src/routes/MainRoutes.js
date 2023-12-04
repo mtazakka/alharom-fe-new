@@ -1,10 +1,11 @@
 import { lazy } from 'react';
 
 // project import
-import MainLayout from 'layout/MainLayout';
-import CommonLayout from 'layout/CommonLayout';
 import Loadable from 'components/Loadable';
-import AuthGuard from 'utils/route-guard/AuthGuard';
+import CommonLayout from 'layout/CommonLayout';
+import MainLayout from 'layout/MainLayout';
+import TransaksiMasukBaru from 'pages/transaksi/masuk/TransaksiMasukBaru';
+import PrivateRoute from './Private';
 
 // render - dashboard
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
@@ -97,11 +98,6 @@ const MuiTableCollapse = Loadable(lazy(() => import('pages/tables/mui-table/coll
 
 // pages routing
 const AuthLogin = Loadable(lazy(() => import('pages/auth/login')));
-const AuthRegister = Loadable(lazy(() => import('pages/auth/register')));
-const AuthForgotPassword = Loadable(lazy(() => import('pages/auth/forgot-password')));
-const AuthResetPassword = Loadable(lazy(() => import('pages/auth/reset-password')));
-const AuthCheckMail = Loadable(lazy(() => import('pages/auth/check-mail')));
-const AuthCodeVerification = Loadable(lazy(() => import('pages/auth/code-verification')));
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
@@ -122,9 +118,9 @@ const MainRoutes = {
     {
       path: '/',
       element: (
-        <AuthGuard>
+        <PrivateRoute>
           <MainLayout />
-        </AuthGuard>
+        </PrivateRoute>
       ),
       children: [
         {
@@ -137,6 +133,15 @@ const MainRoutes = {
             {
               path: 'analytics',
               element: <DashboardAnalytics />
+            }
+          ]
+        },
+        {
+          path: 'transaction',
+          children: [
+            {
+              path: 'income/new',
+              element: <TransaksiMasukBaru />
             }
           ]
         },
@@ -518,26 +523,6 @@ const MainRoutes = {
         {
           path: 'login',
           element: <AuthLogin />
-        },
-        {
-          path: 'register',
-          element: <AuthRegister />
-        },
-        {
-          path: 'forgot-password',
-          element: <AuthForgotPassword />
-        },
-        {
-          path: 'reset-password',
-          element: <AuthResetPassword />
-        },
-        {
-          path: 'check-mail',
-          element: <AuthCheckMail />
-        },
-        {
-          path: 'code-verification',
-          element: <AuthCodeVerification />
         }
       ]
     },

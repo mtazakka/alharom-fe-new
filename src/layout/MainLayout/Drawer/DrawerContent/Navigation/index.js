@@ -3,7 +3,6 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import { Box, Typography, useMediaQuery } from '@mui/material';
-import { Menu } from 'menu-items/dashboard';
 
 import { useSelector } from 'store';
 import useConfig from 'hooks/useConfig';
@@ -31,7 +30,7 @@ const Navigation = () => {
     // eslint-disable-next-line
   }, []);
 
-  let getMenu = Menu();
+  // let getMenu = Menu();
   const handlerMenuItem = () => {
     const isFound = menuItem.items.some((element) => {
       if (element.id === 'group-dashboard') {
@@ -40,8 +39,8 @@ const Navigation = () => {
       return false;
     });
 
-    if (getMenu?.id !== undefined && !isFound) {
-      menuItem.items.splice(0, 0, getMenu);
+    if (!isFound) {
+      menuItem.items.splice(0, 0);
       setMenuItems(menuItem);
     }
   };

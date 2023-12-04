@@ -143,6 +143,7 @@ const NavGroup = ({ item, lastItem, remItems, lastItemId, setSelectedItems, sele
   //   }
   // }, [pathname, menu]);
 
+  // eslint-disable-next-line array-callback-return
   const navCollapse = item.children?.map((menuItem) => {
     switch (menuItem.type) {
       case 'collapse':

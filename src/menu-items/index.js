@@ -5,11 +5,13 @@ import formsTables from './forms-tables';
 import chartsMap from './charts-map';
 import other from './other';
 import pages from './pages';
+import dashboards from './dashboards';
+import transaction from './transaction';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [widget, applications, formsTables, chartsMap, pages, other]
+  items: [dashboards, transaction, widget, applications, formsTables, chartsMap, pages, other]
 };
 
 export default menuItems;
