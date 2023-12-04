@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import CommonLayout from 'layout/CommonLayout';
 import MainLayout from 'layout/MainLayout';
-import TransaksiMasukBaru from 'pages/transaksi/masuk/TransaksiMasukBaru';
+import TransaksiMasukBaru from 'features/transaksi/page/TransaksiMasukBaru';
 import PrivateRoute from './Private';
 
 // render - dashboard

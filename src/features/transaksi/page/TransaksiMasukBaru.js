@@ -1,10 +1,8 @@
 import { useNavigate } from 'react-router';
 
 // material-ui
-import { useTheme } from '@mui/material/styles';
 import {
   Alert,
-  Autocomplete,
   Box,
   Button,
   Divider,
@@ -15,9 +13,9 @@ import {
   MenuItem,
   Select,
   Stack,
-  Stepper,
   Step,
   StepLabel,
+  Stepper,
   Table,
   TableBody,
   TableCell,
@@ -27,37 +25,38 @@ import {
   TextField,
   Typography
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { useTheme } from '@mui/material/styles';
+import { DatePicker, DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 // third party
-import * as yup from 'yup';
-import { v4 as UIDV4 } from 'uuid';
 import { format } from 'date-fns';
 import { FieldArray, Form, Formik } from 'formik';
+import { v4 as UIDV4 } from 'uuid';
+import * as yup from 'yup';
 
 // project import
 import MainCard from 'components/MainCard';
-import InvoiceItem from 'sections/apps/invoice/InvoiceItem';
 import AddressModal from 'sections/apps/invoice/AddressModal';
+import InvoiceItem from 'sections/apps/invoice/InvoiceItem';
 import InvoiceModal from 'sections/apps/invoice/InvoiceModal';
 
-import incrementer from 'utils/incrementer';
 import { useDispatch, useSelector } from 'store';
+import { customerPopup, getInvoiceInsert, getInvoiceList, reviewInvoicePopup, toggleCustomerPopup } from 'store/reducers/invoice';
 import { openSnackbar } from 'store/reducers/snackbar';
-import {
-  customerPopup,
-  toggleCustomerPopup,
-  selectCountry,
-  getInvoiceInsert,
-  reviewInvoicePopup,
-  getInvoiceList
-} from 'store/reducers/invoice';
+import incrementer from 'utils/incrementer';
 
 // assets
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import StepWrapper from 'components/StepWrapper';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  useJenisVariantLayananOption,
+  useTransactionOption,
+  useVariantLayananDetailOption,
+  useVariantLayananGroupOption
+} from '../hooks/getOption';
+import dayjs from 'dayjs';
 
 const validationSchema = yup.object({
   date: yup.date().required('Invoice date is required'),
@@ -116,7 +115,58 @@ const TransaksiMasukBaru = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [skipped, setSkipped] = useState(new Set());
 
-  const { open, isCustomerOpen, countries, country, lists, isOpen } = useSelector((state) => state.invoice);
+  // Start Query Option -------------------
+  const defaultNoInvoice = `INV${dayjs().format('YYMMss')}`;
+  const defaultDetailForms = {
+    tertujuNama: '',
+    tertujuKtp: '',
+    tertujuEmail: '',
+    tertujuAlamat: '',
+    tertujuNoHp: '',
+    nomorInvoice: defaultNoInvoice,
+    tanggal: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    jenisPembayaran: 'TRT-2',
+    namaBank: '',
+    tanggalPembayaran: '',
+    totalHarga: '',
+    payment: '',
+    pajak: '',
+    kembalian: ''
+  };
+
+  const defaultPelayananForms = {
+    id: '',
+    idPelanggan: '',
+    namaPelanggan: '',
+    noKtpPelanggan: '',
+    noHandphonePelanggan: '',
+    idLayanan: '',
+    namaLayanan: '',
+    idVariantLayanan: '',
+    namaVariantLayanan: '',
+    idDetailVariantLayanan: '',
+    namaDetailVariantLayanan: '',
+    idDetailVariantGroupLayanan: '',
+    namaDetailVariantGroupLayanan: '',
+    hargaLayanan: 0
+  };
+  const [finalForm, setFinalForm] = useState();
+  const [forms, setForms] = useState({ ...defaultDetailForms });
+  const [pelayananForms, setPelayananForms] = useState(defaultPelayananForms);
+  const { currentInvoice, pelangganOption, jenisLayananOption } = useTransactionOption();
+  const { jenisVariantLayananOption } = useJenisVariantLayananOption(pelayananForms.idLayanan);
+  const { jenisDetailVariantLayananOption } = useVariantLayananDetailOption(pelayananForms.idVariantLayanan);
+  const { grupOption } = useVariantLayananGroupOption(pelayananForms.idDetailVariantLayanan);
+
+  useEffect(() => {
+    const currentNumber = Number(currentInvoice) + 1;
+    setForms({ ...forms, nomorInvoice: `INV${dayjs().format('YYMM')}${currentNumber}` });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentInvoice]);
+
+  // Start Handle -------
+
+  const { open, isCustomerOpen, country, lists, isOpen } = useSelector((state) => state.invoice);
   const navigation = useNavigate();
   const notesLimit = 500;
 
@@ -169,8 +219,6 @@ const TransaksiMasukBaru = () => {
       })
     );
   };
-
-  //   Stepper
 
   return (
     <MainCard>
@@ -300,8 +348,9 @@ const TransaksiMasukBaru = () => {
                             <InputLabel>Date</InputLabel>
                             <FormControl sx={{ width: '100%' }} error={Boolean(touched.date && errors.date)}>
                               <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                <DatePicker
-                                  format="dd/MM/yyyy"
+                                <DateTimePicker
+                                  ampm={false}
+                                  // format="dd/MM/yyyy"
                                   value={values.date}
                                   onChange={(newValue) => setFieldValue('date', newValue)}
                                 />
@@ -590,73 +639,7 @@ const TransaksiMasukBaru = () => {
                             />
                           </Stack>
                         </Grid>
-                        <Grid item xs={12} sm={6}>
-                          <Stack spacing={1}>
-                            <InputLabel>Set Currency*</InputLabel>
-                            <FormControl sx={{ width: { xs: '100%', sm: 250 } }}>
-                              <Autocomplete
-                                id="country-select-demo"
-                                fullWidth
-                                options={countries}
-                                defaultValue={countries[2]}
-                                value={countries.find((option) => option.code === country?.code)}
-                                onChange={(event, value) => {
-                                  dispatch(
-                                    selectCountry({
-                                      country: value
-                                    })
-                                  );
-                                }}
-                                autoHighlight
-                                getOptionLabel={(option) => option.label}
-                                renderOption={(props, option) => (
-                                  <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                                    {option.code && (
-                                      <img
-                                        loading="lazy"
-                                        width="20"
-                                        src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                                        alt=""
-                                      />
-                                    )}
-                                    {option.label}
-                                  </Box>
-                                )}
-                                renderInput={(params) => {
-                                  const selected = countries.find((option) => option.code === country?.code);
-                                  return (
-                                    <TextField
-                                      {...params}
-                                      name="phoneCode"
-                                      placeholder="Select"
-                                      InputProps={{
-                                        ...params.InputProps,
-                                        startAdornment: (
-                                          <>
-                                            {selected && selected.code !== '' && (
-                                              <img
-                                                style={{ marginRight: 6 }}
-                                                loading="lazy"
-                                                width="20"
-                                                src={`https://flagcdn.com/w20/${selected.code.toLowerCase()}.png`}
-                                                alt=""
-                                              />
-                                            )}
-                                          </>
-                                        )
-                                      }}
-                                      inputProps={{
-                                        ...params.inputProps,
-                                        autoComplete: 'new-password' // disable autocomplete and autofill
-                                      }}
-                                    />
-                                  );
-                                }}
-                              />
-                            </FormControl>
-                          </Stack>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={12}>
                           <Stack direction="row" justifyContent="flex-end" alignItems="flex-end" spacing={2} sx={{ height: '100%' }}>
                             <Button
                               variant="outlined"

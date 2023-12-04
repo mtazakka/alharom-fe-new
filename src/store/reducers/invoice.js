@@ -5,18 +5,13 @@ import { dispatch } from 'store';
 // third-party
 import { createSlice } from '@reduxjs/toolkit';
 
-const countries = [
-  { code: 'US', label: 'United States Dollar', currency: 'Dollar', prefix: '$' },
-  { code: 'GB', label: 'United Kingdom Pound', currency: 'Pound', prefix: '£' },
-  { code: 'IN', label: 'India Rupee', currency: 'Rupee', prefix: '₹' },
-  { code: 'JP', label: 'Japan Yun', currency: 'Yun', prefix: '¥' }
-];
+const countries = { code: 'ID', label: 'Indonesia Rupiah', currency: 'Rupiah', prefix: 'Rp ' };
 
 const initialState = {
   isOpen: false,
   isCustomerOpen: false,
   open: false,
-  country: countries[0],
+  country: countries,
   countries: countries,
   lists: [],
   list: null,
